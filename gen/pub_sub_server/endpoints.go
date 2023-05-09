@@ -35,6 +35,6 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 func NewPublishEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*PublishPayload)
-		return nil, s.Publish(ctx, p)
+		return s.Publish(ctx, p)
 	}
 }

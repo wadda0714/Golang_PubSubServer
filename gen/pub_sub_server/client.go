@@ -26,7 +26,11 @@ func NewClient(publish goa.Endpoint) *Client {
 }
 
 // Publish calls the "publish" endpoint of the "PubSubServer" service.
-func (c *Client) Publish(ctx context.Context, p *PublishPayload) (err error) {
-	_, err = c.PublishEndpoint(ctx, p)
-	return
+func (c *Client) Publish(ctx context.Context, p *PublishPayload) (res int, err error) {
+	var ires any
+	ires, err = c.PublishEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.(int), nil
 }

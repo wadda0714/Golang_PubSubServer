@@ -14,7 +14,7 @@ import (
 // The PubSubServer service performs operations on messages.
 type Service interface {
 	// Publish implements publish.
-	Publish(context.Context, *PublishPayload) (err error)
+	Publish(context.Context, *PublishPayload) (res int, err error)
 }
 
 // ServiceName is the name of the service as defined in the design. This is the

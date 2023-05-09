@@ -24,6 +24,14 @@ var _ = Service("PubSubServer", func() {
 				Description("aaa")
 			})
 		})
+
+		Result(Int)
+
+		HTTP(func() {
+			POST("/publish")
+			Response(StatusOK)
+		})
+
 	})
 
 })
