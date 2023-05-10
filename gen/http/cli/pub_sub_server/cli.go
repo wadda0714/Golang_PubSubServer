@@ -28,9 +28,7 @@ func UsageCommands() string {
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` pub-sub-server publish --body '{
-      "roomID": "Totam commodi repellendus dolor."
-   }'` + "\n" +
+	return os.Args[0] + ` pub-sub-server publish` + "\n" +
 		""
 }
 
@@ -46,8 +44,7 @@ func ParseEndpoint(
 	var (
 		pubSubServerFlags = flag.NewFlagSet("pub-sub-server", flag.ContinueOnError)
 
-		pubSubServerPublishFlags    = flag.NewFlagSet("publish", flag.ExitOnError)
-		pubSubServerPublishBodyFlag = pubSubServerPublishFlags.String("body", "REQUIRED", "")
+		pubSubServerPublishFlags = flag.NewFlagSet("publish", flag.ExitOnError)
 	)
 	pubSubServerFlags.Usage = pubSubServerUsage
 	pubSubServerPublishFlags.Usage = pubSubServerPublishUsage
@@ -116,7 +113,7 @@ func ParseEndpoint(
 			switch epn {
 			case "publish":
 				endpoint = c.Publish()
-				data, err = pubsubserverc.BuildPublishPayload(*pubSubServerPublishBodyFlag)
+				data = nil
 			}
 		}
 	}
@@ -142,14 +139,11 @@ Additional help:
 `, os.Args[0])
 }
 func pubSubServerPublishUsage() {
-	fmt.Fprintf(os.Stderr, `%[1]s [flags] pub-sub-server publish -body JSON
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] pub-sub-server publish
 
 Publish implements publish.
-    -body JSON: 
 
 Example:
-    %[1]s pub-sub-server publish --body '{
-      "roomID": "Totam commodi repellendus dolor."
-   }'
+    %[1]s pub-sub-server publish
 `, os.Args[0])
 }

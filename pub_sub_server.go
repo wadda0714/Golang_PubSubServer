@@ -19,7 +19,7 @@ func NewPubSubServer(logger *log.Logger) pubsubserver.Service {
 }
 
 // Publish implements publish.
-func (s *pubSubServersrvc) Publish(ctx context.Context, p *pubsubserver.PublishPayload) (res int, err error) {
+func (s *pubSubServersrvc) Publish(ctx context.Context) (res int, err error) {
 	s.logger.Print("pubSubServer.publish")
-	return
+	return 2, err
 }

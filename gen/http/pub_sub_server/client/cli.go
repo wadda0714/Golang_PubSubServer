@@ -6,28 +6,3 @@
 // $ goa gen github.com/wadda0714/Golang_PubSubServer/server/design
 
 package client
-
-import (
-	"encoding/json"
-	"fmt"
-
-	pubsubserver "github.com/wadda0714/Golang_PubSubServer/gen/pub_sub_server"
-)
-
-// BuildPublishPayload builds the payload for the PubSubServer publish endpoint
-// from CLI flags.
-func BuildPublishPayload(pubSubServerPublishBody string) (*pubsubserver.PublishPayload, error) {
-	var err error
-	var body PublishRequestBody
-	{
-		err = json.Unmarshal([]byte(pubSubServerPublishBody), &body)
-		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"roomID\": \"Totam commodi repellendus dolor.\"\n   }'")
-		}
-	}
-	v := &pubsubserver.PublishPayload{
-		RoomID: body.RoomID,
-	}
-
-	return v, nil
-}

@@ -9,11 +9,9 @@ package server
 
 import (
 	"context"
-	"io"
 	"net/http"
 
 	goahttp "goa.design/goa/v3/http"
-	goa "goa.design/goa/v3/pkg"
 )
 
 // EncodePublishResponse returns an encoder for responses returned by the
@@ -25,26 +23,5 @@ func EncodePublishResponse(encoder func(context.Context, http.ResponseWriter) go
 		body := res
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)
-	}
-}
-
-// DecodePublishRequest returns a decoder for requests sent to the PubSubServer
-// publish endpoint.
-func DecodePublishRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (any, error) {
-	return func(r *http.Request) (any, error) {
-		var (
-			body PublishRequestBody
-			err  error
-		)
-		err = decoder(r).Decode(&body)
-		if err != nil {
-			if err == io.EOF {
-				return nil, goa.MissingPayloadError()
-			}
-			return nil, goa.DecodePayloadError(err.Error())
-		}
-		payload := NewPublishPayload(&body)
-
-		return payload, nil
 	}
 }

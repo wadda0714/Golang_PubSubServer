@@ -20,15 +20,13 @@ var _ = Service("PubSubServer", func() {
 
 	Method("publish", func() {
 		Payload(func() {
-			Attribute("roomID", String, func() {
-				Description("aaa")
-			})
+
 		})
 
 		Result(Int)
 
 		HTTP(func() {
-			POST("/publish")
+			GET("/publish")
 			Response(StatusOK)
 		})
 

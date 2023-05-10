@@ -54,15 +54,10 @@ func NewClient(
 // service publish server.
 func (c *Client) Publish() goa.Endpoint {
 	var (
-		encodeRequest  = EncodePublishRequest(c.encoder)
 		decodeResponse = DecodePublishResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
 		req, err := c.BuildPublishRequest(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-		err = encodeRequest(req, v)
 		if err != nil {
 			return nil, err
 		}

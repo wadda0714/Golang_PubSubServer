@@ -6,23 +6,3 @@
 // $ goa gen github.com/wadda0714/Golang_PubSubServer/server/design
 
 package client
-
-import (
-	pubsubserver "github.com/wadda0714/Golang_PubSubServer/gen/pub_sub_server"
-)
-
-// PublishRequestBody is the type of the "PubSubServer" service "publish"
-// endpoint HTTP request body.
-type PublishRequestBody struct {
-	// aaa
-	RoomID *string `form:"roomID,omitempty" json:"roomID,omitempty" xml:"roomID,omitempty"`
-}
-
-// NewPublishRequestBody builds the HTTP request body from the payload of the
-// "publish" endpoint of the "PubSubServer" service.
-func NewPublishRequestBody(p *pubsubserver.PublishPayload) *PublishRequestBody {
-	body := &PublishRequestBody{
-		RoomID: p.RoomID,
-	}
-	return body
-}

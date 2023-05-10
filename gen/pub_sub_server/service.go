@@ -14,7 +14,7 @@ import (
 // The PubSubServer service performs operations on messages.
 type Service interface {
 	// Publish implements publish.
-	Publish(context.Context, *PublishPayload) (res int, err error)
+	Publish(context.Context) (res int, err error)
 }
 
 // ServiceName is the name of the service as defined in the design. This is the
@@ -26,10 +26,3 @@ const ServiceName = "PubSubServer"
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
 var MethodNames = [1]string{"publish"}
-
-// PublishPayload is the payload type of the PubSubServer service publish
-// method.
-type PublishPayload struct {
-	// aaa
-	RoomID *string
-}

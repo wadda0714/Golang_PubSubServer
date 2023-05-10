@@ -14,7 +14,6 @@ import (
 	"net/http"
 	"net/url"
 
-	pubsubserver "github.com/wadda0714/Golang_PubSubServer/gen/pub_sub_server"
 	goahttp "goa.design/goa/v3/http"
 )
 
@@ -22,7 +21,7 @@ import (
 // set to call the "PubSubServer" service "publish" endpoint
 func (c *Client) BuildPublishRequest(ctx context.Context, v any) (*http.Request, error) {
 	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: PublishPubSubServerPath()}
-	req, err := http.NewRequest("POST", u.String(), nil)
+	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("PubSubServer", "publish", u.String(), err)
 	}
@@ -31,22 +30,6 @@ func (c *Client) BuildPublishRequest(ctx context.Context, v any) (*http.Request,
 	}
 
 	return req, nil
-}
-
-// EncodePublishRequest returns an encoder for requests sent to the
-// PubSubServer publish server.
-func EncodePublishRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
-	return func(req *http.Request, v any) error {
-		p, ok := v.(*pubsubserver.PublishPayload)
-		if !ok {
-			return goahttp.ErrInvalidType("PubSubServer", "publish", "*pubsubserver.PublishPayload", v)
-		}
-		body := NewPublishRequestBody(p)
-		if err := encoder(req).Encode(&body); err != nil {
-			return goahttp.ErrEncodingError("PubSubServer", "publish", err)
-		}
-		return nil
-	}
 }
 
 // DecodePublishResponse returns a decoder for responses returned by the

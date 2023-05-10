@@ -49,7 +49,7 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
-			{"Publish", "POST", "/publish"},
+			{"Publish", "GET", "/publish"},
 		},
 		Publish: NewPublishHandler(e.Publish, mux, decoder, encoder, errhandler, formatter),
 	}
@@ -85,7 +85,7 @@ func MountPublishHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("POST", "/publish", f)
+	mux.Handle("GET", "/publish", f)
 }
 
 // NewPublishHandler creates a HTTP handler which loads the HTTP request and
@@ -99,7 +99,6 @@ func NewPublishHandler(
 	formatter func(ctx context.Context, err error) goahttp.Statuser,
 ) http.Handler {
 	var (
-		decodeRequest  = DecodePublishRequest(mux, decoder)
 		encodeResponse = EncodePublishResponse(encoder)
 		encodeError    = goahttp.ErrorEncoder(encoder, formatter)
 	)
@@ -107,14 +106,8 @@ func NewPublishHandler(
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
 		ctx = context.WithValue(ctx, goa.MethodKey, "publish")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "PubSubServer")
-		payload, err := decodeRequest(r)
-		if err != nil {
-			if err := encodeError(ctx, w, err); err != nil {
-				errhandler(ctx, w, err)
-			}
-			return
-		}
-		res, err := endpoint(ctx, payload)
+		var err error
+		res, err := endpoint(ctx, nil)
 		if err != nil {
 			if err := encodeError(ctx, w, err); err != nil {
 				errhandler(ctx, w, err)
