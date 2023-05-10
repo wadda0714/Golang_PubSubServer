@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	pubsubserver "github.com/wadda0714/Golang_PubSubServer/gen/pub_sub_server"
+	pubsubserver "github.com/wadda0714/Golang_PubSubServer/server/gen/pub_sub_server"
 )
 
 // PubSubServer service example implementation.
@@ -21,5 +21,5 @@ func NewPubSubServer(logger *log.Logger) pubsubserver.Service {
 // Publish implements publish.
 func (s *pubSubServersrvc) Publish(ctx context.Context) (res int, err error) {
 	s.logger.Print("pubSubServer.publish")
-	return 2, err
+	return
 }

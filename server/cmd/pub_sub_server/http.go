@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	pubsubserversvr "github.com/wadda0714/Golang_PubSubServer/gen/http/pub_sub_server/server"
-	pubsubserver "github.com/wadda0714/Golang_PubSubServer/gen/pub_sub_server"
+	pubsubserversvr "github.com/wadda0714/Golang_PubSubServer/server/gen/http/pub_sub_server/server"
+	pubsubserver "github.com/wadda0714/Golang_PubSubServer/server/gen/pub_sub_server"
 	goahttp "goa.design/goa/v3/http"
 	httpmdlwr "goa.design/goa/v3/http/middleware"
 	"goa.design/goa/v3/middleware"
