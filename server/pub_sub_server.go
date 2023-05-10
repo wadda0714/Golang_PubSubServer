@@ -2,6 +2,7 @@ package pubsubserverrestapi
 
 import (
 	"context"
+	"github.com/wadda0714/Golang_PubSubServer/util"
 	"log"
 
 	pubsubserver "github.com/wadda0714/Golang_PubSubServer/server/gen/pub_sub_server"
@@ -33,5 +34,15 @@ func (s *pubSubServersrvc) Subscribe(ctx context.Context, p *pubsubserver.Subscr
 // SendMessage implements sendMessage.
 func (s *pubSubServersrvc) SendMessage(ctx context.Context, p *pubsubserver.SendMessagePayload) (res string, err error) {
 	s.logger.Print("pubSubServer.sendMessage")
-	return
+
+	f, err := util.CreateFile("test.txt")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	f.WriteString("\n" + *p.Message)
+
+	return "ok", nil
+
 }
