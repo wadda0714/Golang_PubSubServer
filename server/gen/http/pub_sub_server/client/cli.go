@@ -6,3 +6,51 @@
 // $ goa gen github.com/wadda0714/Golang_PubSubServer/server/design -o ./server
 
 package client
+
+import (
+	pubsubserver "github.com/wadda0714/Golang_PubSubServer/server/gen/pub_sub_server"
+)
+
+// BuildPublishPayload builds the payload for the PubSubServer publish endpoint
+// from CLI flags.
+func BuildPublishPayload(pubSubServerPublishRoomName string) (*pubsubserver.PublishPayload, error) {
+	var roomName string
+	{
+		roomName = pubSubServerPublishRoomName
+	}
+	v := &pubsubserver.PublishPayload{}
+	v.RoomName = &roomName
+
+	return v, nil
+}
+
+// BuildSubscribePayload builds the payload for the PubSubServer subscribe
+// endpoint from CLI flags.
+func BuildSubscribePayload(pubSubServerSubscribeRoomName string) (*pubsubserver.SubscribePayload, error) {
+	var roomName string
+	{
+		roomName = pubSubServerSubscribeRoomName
+	}
+	v := &pubsubserver.SubscribePayload{}
+	v.RoomName = &roomName
+
+	return v, nil
+}
+
+// BuildSendMessagePayload builds the payload for the PubSubServer sendMessage
+// endpoint from CLI flags.
+func BuildSendMessagePayload(pubSubServerSendMessageRoomName string, pubSubServerSendMessageMessage string) (*pubsubserver.SendMessagePayload, error) {
+	var roomName string
+	{
+		roomName = pubSubServerSendMessageRoomName
+	}
+	var message string
+	{
+		message = pubSubServerSendMessageMessage
+	}
+	v := &pubsubserver.SendMessagePayload{}
+	v.RoomName = &roomName
+	v.Message = &message
+
+	return v, nil
+}

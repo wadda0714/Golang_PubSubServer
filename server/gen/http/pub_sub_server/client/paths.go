@@ -7,7 +7,21 @@
 
 package client
 
+import (
+	"fmt"
+)
+
 // PublishPubSubServerPath returns the URL path to the PubSubServer service publish HTTP endpoint.
-func PublishPubSubServerPath() string {
-	return "/publish"
+func PublishPubSubServerPath(roomName string) string {
+	return fmt.Sprintf("/publish/%v", roomName)
+}
+
+// SubscribePubSubServerPath returns the URL path to the PubSubServer service subscribe HTTP endpoint.
+func SubscribePubSubServerPath(roomName string) string {
+	return fmt.Sprintf("/subscribe/%v", roomName)
+}
+
+// SendMessagePubSubServerPath returns the URL path to the PubSubServer service sendMessage HTTP endpoint.
+func SendMessagePubSubServerPath(roomName string, message string) string {
+	return fmt.Sprintf("/SendMessage/%v/%v", roomName, message)
 }

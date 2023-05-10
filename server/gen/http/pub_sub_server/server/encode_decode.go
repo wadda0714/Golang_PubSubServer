@@ -18,10 +18,84 @@ import (
 // PubSubServer publish endpoint.
 func EncodePublishResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		res, _ := v.(int)
+		res, _ := v.(string)
 		enc := encoder(ctx, w)
 		body := res
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)
+	}
+}
+
+// DecodePublishRequest returns a decoder for requests sent to the PubSubServer
+// publish endpoint.
+func DecodePublishRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (any, error) {
+	return func(r *http.Request) (any, error) {
+		var (
+			roomName string
+
+			params = mux.Vars(r)
+		)
+		roomName = params["roomName"]
+		payload := NewPublishPayload(roomName)
+
+		return payload, nil
+	}
+}
+
+// EncodeSubscribeResponse returns an encoder for responses returned by the
+// PubSubServer subscribe endpoint.
+func EncodeSubscribeResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
+	return func(ctx context.Context, w http.ResponseWriter, v any) error {
+		res, _ := v.(string)
+		enc := encoder(ctx, w)
+		body := res
+		w.WriteHeader(http.StatusOK)
+		return enc.Encode(body)
+	}
+}
+
+// DecodeSubscribeRequest returns a decoder for requests sent to the
+// PubSubServer subscribe endpoint.
+func DecodeSubscribeRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (any, error) {
+	return func(r *http.Request) (any, error) {
+		var (
+			roomName string
+
+			params = mux.Vars(r)
+		)
+		roomName = params["roomName"]
+		payload := NewSubscribePayload(roomName)
+
+		return payload, nil
+	}
+}
+
+// EncodeSendMessageResponse returns an encoder for responses returned by the
+// PubSubServer sendMessage endpoint.
+func EncodeSendMessageResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
+	return func(ctx context.Context, w http.ResponseWriter, v any) error {
+		res, _ := v.(string)
+		enc := encoder(ctx, w)
+		body := res
+		w.WriteHeader(http.StatusOK)
+		return enc.Encode(body)
+	}
+}
+
+// DecodeSendMessageRequest returns a decoder for requests sent to the
+// PubSubServer sendMessage endpoint.
+func DecodeSendMessageRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (any, error) {
+	return func(r *http.Request) (any, error) {
+		var (
+			roomName string
+			message  string
+
+			params = mux.Vars(r)
+		)
+		roomName = params["roomName"]
+		message = params["message"]
+		payload := NewSendMessagePayload(roomName, message)
+
+		return payload, nil
 	}
 }

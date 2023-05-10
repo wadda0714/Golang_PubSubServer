@@ -18,8 +18,10 @@ import (
 
 // Server lists the PubSubServer service endpoint HTTP handlers.
 type Server struct {
-	Mounts  []*MountPoint
-	Publish http.Handler
+	Mounts      []*MountPoint
+	Publish     http.Handler
+	Subscribe   http.Handler
+	SendMessage http.Handler
 }
 
 // MountPoint holds information about the mounted endpoints.
@@ -49,9 +51,13 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
-			{"Publish", "GET", "/publish"},
+			{"Publish", "GET", "/publish/{roomName}"},
+			{"Subscribe", "GET", "/subscribe/{roomName}"},
+			{"SendMessage", "GET", "/SendMessage/{roomName}/{message}"},
 		},
-		Publish: NewPublishHandler(e.Publish, mux, decoder, encoder, errhandler, formatter),
+		Publish:     NewPublishHandler(e.Publish, mux, decoder, encoder, errhandler, formatter),
+		Subscribe:   NewSubscribeHandler(e.Subscribe, mux, decoder, encoder, errhandler, formatter),
+		SendMessage: NewSendMessageHandler(e.SendMessage, mux, decoder, encoder, errhandler, formatter),
 	}
 }
 
@@ -61,6 +67,8 @@ func (s *Server) Service() string { return "PubSubServer" }
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
 	s.Publish = m(s.Publish)
+	s.Subscribe = m(s.Subscribe)
+	s.SendMessage = m(s.SendMessage)
 }
 
 // MethodNames returns the methods served.
@@ -69,6 +77,8 @@ func (s *Server) MethodNames() []string { return pubsubserver.MethodNames[:] }
 // Mount configures the mux to serve the PubSubServer endpoints.
 func Mount(mux goahttp.Muxer, h *Server) {
 	MountPublishHandler(mux, h.Publish)
+	MountSubscribeHandler(mux, h.Subscribe)
+	MountSendMessageHandler(mux, h.SendMessage)
 }
 
 // Mount configures the mux to serve the PubSubServer endpoints.
@@ -85,7 +95,7 @@ func MountPublishHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("GET", "/publish", f)
+	mux.Handle("GET", "/publish/{roomName}", f)
 }
 
 // NewPublishHandler creates a HTTP handler which loads the HTTP request and
@@ -99,6 +109,7 @@ func NewPublishHandler(
 	formatter func(ctx context.Context, err error) goahttp.Statuser,
 ) http.Handler {
 	var (
+		decodeRequest  = DecodePublishRequest(mux, decoder)
 		encodeResponse = EncodePublishResponse(encoder)
 		encodeError    = goahttp.ErrorEncoder(encoder, formatter)
 	)
@@ -106,8 +117,116 @@ func NewPublishHandler(
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
 		ctx = context.WithValue(ctx, goa.MethodKey, "publish")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "PubSubServer")
-		var err error
-		res, err := endpoint(ctx, nil)
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			errhandler(ctx, w, err)
+		}
+	})
+}
+
+// MountSubscribeHandler configures the mux to serve the "PubSubServer" service
+// "subscribe" endpoint.
+func MountSubscribeHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("GET", "/subscribe/{roomName}", f)
+}
+
+// NewSubscribeHandler creates a HTTP handler which loads the HTTP request and
+// calls the "PubSubServer" service "subscribe" endpoint.
+func NewSubscribeHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(ctx context.Context, err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		decodeRequest  = DecodeSubscribeRequest(mux, decoder)
+		encodeResponse = EncodeSubscribeResponse(encoder)
+		encodeError    = goahttp.ErrorEncoder(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "subscribe")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "PubSubServer")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			errhandler(ctx, w, err)
+		}
+	})
+}
+
+// MountSendMessageHandler configures the mux to serve the "PubSubServer"
+// service "sendMessage" endpoint.
+func MountSendMessageHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("GET", "/SendMessage/{roomName}/{message}", f)
+}
+
+// NewSendMessageHandler creates a HTTP handler which loads the HTTP request
+// and calls the "PubSubServer" service "sendMessage" endpoint.
+func NewSendMessageHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(ctx context.Context, err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		decodeRequest  = DecodeSendMessageRequest(mux, decoder)
+		encodeResponse = EncodeSendMessageResponse(encoder)
+		encodeError    = goahttp.ErrorEncoder(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "sendMessage")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "PubSubServer")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
 		if err != nil {
 			if err := encodeError(ctx, w, err); err != nil {
 				errhandler(ctx, w, err)

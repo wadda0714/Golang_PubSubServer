@@ -14,13 +14,26 @@ import (
 	"net/http"
 	"net/url"
 
+	pubsubserver "github.com/wadda0714/Golang_PubSubServer/server/gen/pub_sub_server"
 	goahttp "goa.design/goa/v3/http"
 )
 
 // BuildPublishRequest instantiates a HTTP request object with method and path
 // set to call the "PubSubServer" service "publish" endpoint
 func (c *Client) BuildPublishRequest(ctx context.Context, v any) (*http.Request, error) {
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: PublishPubSubServerPath()}
+	var (
+		roomName string
+	)
+	{
+		p, ok := v.(*pubsubserver.PublishPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("PubSubServer", "publish", "*pubsubserver.PublishPayload", v)
+		}
+		if p.RoomName != nil {
+			roomName = *p.RoomName
+		}
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: PublishPubSubServerPath(roomName)}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("PubSubServer", "publish", u.String(), err)
@@ -52,7 +65,7 @@ func DecodePublishResponse(decoder func(*http.Response) goahttp.Decoder, restore
 		switch resp.StatusCode {
 		case http.StatusOK:
 			var (
-				body int
+				body string
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
@@ -63,6 +76,134 @@ func DecodePublishResponse(decoder func(*http.Response) goahttp.Decoder, restore
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("PubSubServer", "publish", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildSubscribeRequest instantiates a HTTP request object with method and
+// path set to call the "PubSubServer" service "subscribe" endpoint
+func (c *Client) BuildSubscribeRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		roomName string
+	)
+	{
+		p, ok := v.(*pubsubserver.SubscribePayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("PubSubServer", "subscribe", "*pubsubserver.SubscribePayload", v)
+		}
+		if p.RoomName != nil {
+			roomName = *p.RoomName
+		}
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: SubscribePubSubServerPath(roomName)}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("PubSubServer", "subscribe", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// DecodeSubscribeResponse returns a decoder for responses returned by the
+// PubSubServer subscribe endpoint. restoreBody controls whether the response
+// body should be restored after having been read.
+func DecodeSubscribeResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body string
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("PubSubServer", "subscribe", err)
+			}
+			return body, nil
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("PubSubServer", "subscribe", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildSendMessageRequest instantiates a HTTP request object with method and
+// path set to call the "PubSubServer" service "sendMessage" endpoint
+func (c *Client) BuildSendMessageRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		roomName string
+		message  string
+	)
+	{
+		p, ok := v.(*pubsubserver.SendMessagePayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("PubSubServer", "sendMessage", "*pubsubserver.SendMessagePayload", v)
+		}
+		if p.RoomName != nil {
+			roomName = *p.RoomName
+		}
+		if p.Message != nil {
+			message = *p.Message
+		}
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: SendMessagePubSubServerPath(roomName, message)}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("PubSubServer", "sendMessage", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// DecodeSendMessageResponse returns a decoder for responses returned by the
+// PubSubServer sendMessage endpoint. restoreBody controls whether the response
+// body should be restored after having been read.
+func DecodeSendMessageResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body string
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("PubSubServer", "sendMessage", err)
+			}
+			return body, nil
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("PubSubServer", "sendMessage", resp.StatusCode, string(body))
 		}
 	}
 }

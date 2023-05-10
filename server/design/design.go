@@ -20,16 +20,52 @@ var _ = Service("PubSubServer", func() {
 
 	Method("publish", func() {
 		Payload(func() {
-
+			Attribute("roomName", String, "roomName to publish", func() {
+				Example("room1")
+			})
 		})
 
-		Result(Int)
+		Result(String)
 
 		HTTP(func() {
-			GET("/publish")
+			GET("/publish/{roomName}")
 			Response(StatusOK)
 		})
 
+	})
+
+	Method("subscribe", func() {
+		Payload(func() {
+			Attribute("roomName", String, "roomName to subscribe", func() {
+				Example("room1")
+			})
+
+		})
+
+		Result(String)
+
+		HTTP(func() {
+			GET("/subscribe/{roomName}")
+			Response(StatusOK)
+		})
+
+	})
+
+	Method("sendMessage", func() {
+		Payload(func() {
+			Attribute("roomName", String, "roomName to publish", func() {
+				Example("room1")
+			})
+			Attribute("message", String, "message to publish", func() {
+				Example("hello")
+			})
+		})
+		Result(String)
+
+		HTTP(func() {
+			GET("/SendMessage/{roomName}/{message}")
+			Response(StatusOK)
+		})
 	})
 
 })

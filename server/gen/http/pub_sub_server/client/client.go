@@ -21,6 +21,14 @@ type Client struct {
 	// endpoint.
 	PublishDoer goahttp.Doer
 
+	// Subscribe Doer is the HTTP client used to make requests to the subscribe
+	// endpoint.
+	SubscribeDoer goahttp.Doer
+
+	// SendMessage Doer is the HTTP client used to make requests to the sendMessage
+	// endpoint.
+	SendMessageDoer goahttp.Doer
+
 	// RestoreResponseBody controls whether the response bodies are reset after
 	// decoding so they can be read again.
 	RestoreResponseBody bool
@@ -42,6 +50,8 @@ func NewClient(
 ) *Client {
 	return &Client{
 		PublishDoer:         doer,
+		SubscribeDoer:       doer,
+		SendMessageDoer:     doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
 		host:                host,
@@ -64,6 +74,44 @@ func (c *Client) Publish() goa.Endpoint {
 		resp, err := c.PublishDoer.Do(req)
 		if err != nil {
 			return nil, goahttp.ErrRequestError("PubSubServer", "publish", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// Subscribe returns an endpoint that makes HTTP requests to the PubSubServer
+// service subscribe server.
+func (c *Client) Subscribe() goa.Endpoint {
+	var (
+		decodeResponse = DecodeSubscribeResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildSubscribeRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.SubscribeDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("PubSubServer", "subscribe", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// SendMessage returns an endpoint that makes HTTP requests to the PubSubServer
+// service sendMessage server.
+func (c *Client) SendMessage() goa.Endpoint {
+	var (
+		decodeResponse = DecodeSendMessageResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildSendMessageRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.SendMessageDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("PubSubServer", "sendMessage", err)
 		}
 		return decodeResponse(resp)
 	}

@@ -19,7 +19,19 @@ func NewPubSubServer(logger *log.Logger) pubsubserver.Service {
 }
 
 // Publish implements publish.
-func (s *pubSubServersrvc) Publish(ctx context.Context) (res int, err error) {
+func (s *pubSubServersrvc) Publish(ctx context.Context, p *pubsubserver.PublishPayload) (res string, err error) {
 	s.logger.Print("pubSubServer.publish")
+	return
+}
+
+// Subscribe implements subscribe.
+func (s *pubSubServersrvc) Subscribe(ctx context.Context, p *pubsubserver.SubscribePayload) (res string, err error) {
+	s.logger.Print("pubSubServer.subscribe")
+	return
+}
+
+// SendMessage implements sendMessage.
+func (s *pubSubServersrvc) SendMessage(ctx context.Context, p *pubsubserver.SendMessagePayload) (res string, err error) {
+	s.logger.Print("pubSubServer.sendMessage")
 	return
 }

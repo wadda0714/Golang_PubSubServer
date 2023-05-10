@@ -22,13 +22,13 @@ import (
 //
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() string {
-	return `pub-sub-server publish
+	return `pub-sub-server (publish|subscribe|send-message)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` pub-sub-server publish` + "\n" +
+	return os.Args[0] + ` pub-sub-server publish --room-name "room1"` + "\n" +
 		""
 }
 
@@ -44,10 +44,20 @@ func ParseEndpoint(
 	var (
 		pubSubServerFlags = flag.NewFlagSet("pub-sub-server", flag.ContinueOnError)
 
-		pubSubServerPublishFlags = flag.NewFlagSet("publish", flag.ExitOnError)
+		pubSubServerPublishFlags        = flag.NewFlagSet("publish", flag.ExitOnError)
+		pubSubServerPublishRoomNameFlag = pubSubServerPublishFlags.String("room-name", "REQUIRED", "roomName to publish")
+
+		pubSubServerSubscribeFlags        = flag.NewFlagSet("subscribe", flag.ExitOnError)
+		pubSubServerSubscribeRoomNameFlag = pubSubServerSubscribeFlags.String("room-name", "REQUIRED", "roomName to subscribe")
+
+		pubSubServerSendMessageFlags        = flag.NewFlagSet("send-message", flag.ExitOnError)
+		pubSubServerSendMessageRoomNameFlag = pubSubServerSendMessageFlags.String("room-name", "REQUIRED", "roomName to publish")
+		pubSubServerSendMessageMessageFlag  = pubSubServerSendMessageFlags.String("message", "REQUIRED", "message to publish")
 	)
 	pubSubServerFlags.Usage = pubSubServerUsage
 	pubSubServerPublishFlags.Usage = pubSubServerPublishUsage
+	pubSubServerSubscribeFlags.Usage = pubSubServerSubscribeUsage
+	pubSubServerSendMessageFlags.Usage = pubSubServerSendMessageUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -86,6 +96,12 @@ func ParseEndpoint(
 			case "publish":
 				epf = pubSubServerPublishFlags
 
+			case "subscribe":
+				epf = pubSubServerSubscribeFlags
+
+			case "send-message":
+				epf = pubSubServerSendMessageFlags
+
 			}
 
 		}
@@ -113,7 +129,13 @@ func ParseEndpoint(
 			switch epn {
 			case "publish":
 				endpoint = c.Publish()
-				data = nil
+				data, err = pubsubserverc.BuildPublishPayload(*pubSubServerPublishRoomNameFlag)
+			case "subscribe":
+				endpoint = c.Subscribe()
+				data, err = pubsubserverc.BuildSubscribePayload(*pubSubServerSubscribeRoomNameFlag)
+			case "send-message":
+				endpoint = c.SendMessage()
+				data, err = pubsubserverc.BuildSendMessagePayload(*pubSubServerSendMessageRoomNameFlag, *pubSubServerSendMessageMessageFlag)
 			}
 		}
 	}
@@ -133,17 +155,43 @@ Usage:
 
 COMMAND:
     publish: Publish implements publish.
+    subscribe: Subscribe implements subscribe.
+    send-message: SendMessage implements sendMessage.
 
 Additional help:
     %[1]s pub-sub-server COMMAND --help
 `, os.Args[0])
 }
 func pubSubServerPublishUsage() {
-	fmt.Fprintf(os.Stderr, `%[1]s [flags] pub-sub-server publish
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] pub-sub-server publish -room-name STRING
 
 Publish implements publish.
+    -room-name STRING: roomName to publish
 
 Example:
-    %[1]s pub-sub-server publish
+    %[1]s pub-sub-server publish --room-name "room1"
+`, os.Args[0])
+}
+
+func pubSubServerSubscribeUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] pub-sub-server subscribe -room-name STRING
+
+Subscribe implements subscribe.
+    -room-name STRING: roomName to subscribe
+
+Example:
+    %[1]s pub-sub-server subscribe --room-name "room1"
+`, os.Args[0])
+}
+
+func pubSubServerSendMessageUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] pub-sub-server send-message -room-name STRING -message STRING
+
+SendMessage implements sendMessage.
+    -room-name STRING: roomName to publish
+    -message STRING: message to publish
+
+Example:
+    %[1]s pub-sub-server send-message --room-name "room1" --message "hello"
 `, os.Args[0])
 }

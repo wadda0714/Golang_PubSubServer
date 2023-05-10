@@ -15,22 +15,46 @@ import (
 
 // Client is the "PubSubServer" service client.
 type Client struct {
-	PublishEndpoint goa.Endpoint
+	PublishEndpoint     goa.Endpoint
+	SubscribeEndpoint   goa.Endpoint
+	SendMessageEndpoint goa.Endpoint
 }
 
 // NewClient initializes a "PubSubServer" service client given the endpoints.
-func NewClient(publish goa.Endpoint) *Client {
+func NewClient(publish, subscribe, sendMessage goa.Endpoint) *Client {
 	return &Client{
-		PublishEndpoint: publish,
+		PublishEndpoint:     publish,
+		SubscribeEndpoint:   subscribe,
+		SendMessageEndpoint: sendMessage,
 	}
 }
 
 // Publish calls the "publish" endpoint of the "PubSubServer" service.
-func (c *Client) Publish(ctx context.Context) (res int, err error) {
+func (c *Client) Publish(ctx context.Context, p *PublishPayload) (res string, err error) {
 	var ires any
-	ires, err = c.PublishEndpoint(ctx, nil)
+	ires, err = c.PublishEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
-	return ires.(int), nil
+	return ires.(string), nil
+}
+
+// Subscribe calls the "subscribe" endpoint of the "PubSubServer" service.
+func (c *Client) Subscribe(ctx context.Context, p *SubscribePayload) (res string, err error) {
+	var ires any
+	ires, err = c.SubscribeEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.(string), nil
+}
+
+// SendMessage calls the "sendMessage" endpoint of the "PubSubServer" service.
+func (c *Client) SendMessage(ctx context.Context, p *SendMessagePayload) (res string, err error) {
+	var ires any
+	ires, err = c.SendMessageEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.(string), nil
 }

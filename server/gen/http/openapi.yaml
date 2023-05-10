@@ -13,17 +13,65 @@ produces:
     - application/xml
     - application/gob
 paths:
-    /publish:
+    /SendMessage/{roomName}/{message}:
+        get:
+            tags:
+                - PubSubServer
+            summary: sendMessage PubSubServer
+            operationId: PubSubServer#sendMessage
+            parameters:
+                - name: roomName
+                  in: path
+                  description: roomName to publish
+                  required: true
+                  type: string
+                - name: message
+                  in: path
+                  description: message to publish
+                  required: true
+                  type: string
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        type: string
+            schemes:
+                - http
+    /publish/{roomName}:
         get:
             tags:
                 - PubSubServer
             summary: publish PubSubServer
             operationId: PubSubServer#publish
+            parameters:
+                - name: roomName
+                  in: path
+                  description: roomName to publish
+                  required: true
+                  type: string
             responses:
                 "200":
                     description: OK response.
                     schema:
-                        type: integer
-                        format: int64
+                        type: string
+            schemes:
+                - http
+    /subscribe/{roomName}:
+        get:
+            tags:
+                - PubSubServer
+            summary: subscribe PubSubServer
+            operationId: PubSubServer#subscribe
+            parameters:
+                - name: roomName
+                  in: path
+                  description: roomName to subscribe
+                  required: true
+                  type: string
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        type: string
             schemes:
                 - http
