@@ -28,6 +28,12 @@ func (s *pubSubServersrvc) Publish(ctx context.Context, p *pubsubserver.PublishP
 // Subscribe implements subscribe.
 func (s *pubSubServersrvc) Subscribe(ctx context.Context, p *pubsubserver.SubscribePayload) (res string, err error) {
 	s.logger.Print("pubSubServer.subscribe")
+	nameList, err := util.ReadFile("test.txt")
+	if err != nil {
+		panic(err)
+	}
+	s.logger.Print(nameList)
+
 	return
 }
 
