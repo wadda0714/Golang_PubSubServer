@@ -3,6 +3,11 @@ package model
 import ()
 
 type User struct {
-	Id   int64  `json:"id"`
+	ID   int64  `json:"id"`
 	Name string `json:"name"`
+}
+
+type Message struct {
+	Text      string `json:"text"`
+	TimeStamp string `json:"timestamp"`
 }
