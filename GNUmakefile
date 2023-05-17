@@ -15,3 +15,6 @@ build-server-all:
 	@make gen-design
 	@make gen-example
 	@make build-server
+
+psql:
+	@psql -h localhost -p 5430 -U root
