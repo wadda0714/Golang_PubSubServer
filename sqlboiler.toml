@@ -1,0 +1,8 @@
+[psql]
+ dbname = "userdb"
+ host = "localhost"
+ port = 5430
+ user = "root"
+ pass = "root"
+ sslmode = "disable"
+ schema = "public"
