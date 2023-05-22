@@ -18,3 +18,6 @@ build-server-all:
 
 psql:
 	@psql -h localhost -p 5430 -U root
+
+sqlboiler:
+	@sqlboiler psql --config ./sqlboiler.toml --pkgname userdb --no-hooks --struct-tag-casing camel --output ./pkg/userdb --no-tests --wipe
