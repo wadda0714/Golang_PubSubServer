@@ -3,8 +3,5 @@
 
 package userdb
 
-var TableNames = struct {
-	User string
-}{
-	User: "user",
-}
+var ViewNames = struct {
+}{}
