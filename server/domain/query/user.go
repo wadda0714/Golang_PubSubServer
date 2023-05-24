@@ -7,4 +7,5 @@ import (
 type UserQuery interface {
 	GetUsers(roomID int) ([]*model.User, error)
 	GetUserByID(id int) (*model.User, error)
+	GetMessagesByRoomID(roomID int) ([]*model.Message, error)
 }
