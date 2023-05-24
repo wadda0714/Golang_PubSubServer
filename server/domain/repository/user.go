@@ -8,4 +8,5 @@ type UserRepository interface {
 	AddUserToDB(user *model.User) error
 	DeleteUserFromDB(user *model.User) error
 	AddMessageToDB(message *model.Message) error
+	EnterRoom() error
 }

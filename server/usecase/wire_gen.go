@@ -9,12 +9,14 @@ package usecase
 import (
 	"database/sql"
 	"github.com/wadda0714/Golang_PubSubServer/server/infra/query"
+	"github.com/wadda0714/Golang_PubSubServer/server/infra/repository"
 )
 
 // Injectors from wire.go:
 
 func GeneratedNewUserDI(db *sql.DB) User {
 	userQuery := query.NewUser(db)
-	user := NewUser(userQuery)
+	userRepository := repository.NewUser(db)
+	user := NewUser(userQuery, userRepository)
 	return user
 }

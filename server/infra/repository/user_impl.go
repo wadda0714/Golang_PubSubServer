@@ -32,3 +32,7 @@ func (u *user) DeleteUserFromDB(user *model.User) (err error) {
 func (u *user) AddMessageToDB(message *model.Message) (err error) {
 	return nil
 }
+
+func (u *user) EnterRoom() (err error) {
+	return nil
+}

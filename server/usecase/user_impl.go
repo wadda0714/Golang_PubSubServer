@@ -2,23 +2,23 @@ package usecase
 
 import (
 	"github.com/wadda0714/Golang_PubSubServer/server/domain/query"
-	//"github.com/wadda0714/Golang_PubSubServer/server/domain/repository"
+	"github.com/wadda0714/Golang_PubSubServer/server/domain/repository"
 	"github.com/wadda0714/Golang_PubSubServer/server/usecase/input"
 	"github.com/wadda0714/Golang_PubSubServer/server/usecase/output"
 )
 
 type User struct {
 	userQuery query.UserQuery
-	//userRepo  repository.UserRepository
+	userRepo  repository.UserRepository
 }
 
 func NewUser(
 	userQuery query.UserQuery,
-	//userRepo repository.UserRepository,
+	userRepo repository.UserRepository,
 ) User {
 	return User{
 		userQuery,
-		//userRepo,
+		userRepo,
 	}
 }
 
