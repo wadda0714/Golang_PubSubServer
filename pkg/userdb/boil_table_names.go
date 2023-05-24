@@ -4,7 +4,9 @@
 package userdb
 
 var TableNames = struct {
-	User string
+	Messages string
+	User     string
 }{
-	User: "user",
+	Messages: "messages",
+	User:     "user",
 }

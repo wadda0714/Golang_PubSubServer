@@ -8,6 +8,6 @@ type User struct {
 }
 
 type Message struct {
-	Text      string `json:"text"`
+	Content   string `json:"text"`
 	TimeStamp string `json:"timestamp"`
 }

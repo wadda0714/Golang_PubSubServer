@@ -1,8 +1,11 @@
 package output
 
-import ()
+import (
+	"github.com/wadda0714/Golang_PubSubServer/server/domain/model"
+)
 
 type SubscribeOutput struct {
+	Messages []*model.Message
 }
 
 type UnsubscribeOutput struct {
