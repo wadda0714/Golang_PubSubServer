@@ -3,7 +3,6 @@ package query
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/wadda0714/Golang_PubSubServer/pkg/userdb"
 	"github.com/wadda0714/Golang_PubSubServer/server/domain/model"
@@ -32,19 +31,19 @@ func (u *User) GetMessagesByRoomID(roomID int) ([]*model.Message, error) {
 	ctx := context.Background()
 
 	queries := append(options, []qm.QueryMod{
-		userdb.MessageWhere.Messageid.EQ("message1"),
+		userdb.MessageWhere.Roomid.EQ("aaa1"),
 	}...)
 	var err error
-	var msg *userdb.Message
-	if msg, err = userdb.Messages(queries...).One(ctx, u.db); err != nil {
+	var msg []*userdb.Message
+	if msg, err = userdb.Messages(queries...).All(ctx, u.db); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
 	}
-	fmt.Println(msg.Content)
 	var msgs []*model.Message
-	//配列のmsgsにmsgを追加する
-	msgs = append(msgs, transfer.ConvertMessages(msg))
+	for _, v := range msg {
+		msgs = append(msgs, transfer.ConvertMessages(v))
+	}
 
 	return msgs, nil
 }
